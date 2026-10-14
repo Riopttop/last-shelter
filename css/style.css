@@ -31,7 +31,7 @@ html,body{margin:0;height:100%;background:var(--bg-void);overflow:hidden;font-fa
 /* dust on the lens */
 #app::after{content:"";position:absolute;inset:0;z-index:30;pointer-events:none;background:var(--grain);opacity:.07;}
 
-canvas#game{position:absolute;inset:0;display:block;cursor:none;background:#1a1a12;}
+canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:none;background:#1a1a12;}
 
 /* ---------- HUD ---------- */
 #hud{position:absolute;inset:0;pointer-events:none;font-family:var(--mono-font);user-select:none;}
@@ -437,16 +437,36 @@ button.hazard-btn.alt:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 0 
 /* ---------- Touch controls (controls.js) ---------- */
 #app{touch-action:none;}
 #app.touch #keysPlate{display:none;}
-#app.touch #buildBar{left:16px;transform:scale(.86);transform-origin:0 100%;} /* clear of the buttons on the right */
-#app:not([data-state="playing"]) #touchUI,#app:not([data-state="playing"]) #stick{display:none;}
-#touchUI{position:absolute;right:12px;bottom:12px;z-index:6;display:grid;grid-template-columns:repeat(3,64px);gap:6px;user-select:none;-webkit-user-select:none;}
-#touchUI button{height:44px;padding:0;font-family:var(--mono-font);font-size:12px;color:var(--paper-100);background:rgba(20,22,16,.72);border:1px solid var(--steel-500);border-radius:4px;touch-action:none;}
-#touchUI button:active,#touchUI button.on{background:rgba(217,165,40,.3);border-color:var(--hazard-500);color:var(--hazard-300);}
-#touchUI button.wide{grid-column:1/-1;height:52px;font-size:14px;color:var(--hazard-300);border-color:var(--hazard-500);}
+#app:not([data-state="playing"]) #touchUI,#app:not([data-state="playing"]) .stick{display:none;}
+/* a phone shows the stage at about half size, so everything a thumb has to hit is drawn large:
+   a row of menu buttons along the top right, the action pad in the bottom right corner */
+#touchUI{user-select:none;-webkit-user-select:none;}
+.t-top{position:absolute;top:12px;right:12px;z-index:6;display:flex;gap:8px;}
+.t-pad{position:absolute;right:12px;bottom:12px;z-index:6;display:grid;grid-template-columns:repeat(3,96px);gap:9px;}
+#touchUI button{height:74px;padding:0;font-family:var(--body-font);font-weight:700;font-size:18px;color:var(--paper-100);background:rgba(20,22,16,.6);border:2px solid var(--steel-500);border-radius:12px;touch-action:none;}
+.t-top button{width:78px;height:60px !important;}
+#touchUI button:active,#touchUI button.on{background:rgba(217,165,40,.35);border-color:var(--hazard-500);color:var(--hazard-300);}
+#touchUI button.wide{grid-column:span 2;color:var(--hazard-300);border-color:var(--hazard-500);}
 #touchUI button.off{visibility:hidden;}
-#stick{position:absolute;z-index:6;width:0;height:0;pointer-events:none;}
-#stick::before{content:"";position:absolute;left:-56px;top:-56px;width:112px;height:112px;border-radius:50%;border:2px solid rgba(207,199,168,.35);background:rgba(0,0,0,.2);}
-#stick i{position:absolute;left:-24px;top:-24px;width:48px;height:48px;border-radius:50%;background:rgba(217,165,40,.45);border:1px solid rgba(0,0,0,.6);}
+.stick{position:absolute;z-index:6;width:0;height:0;pointer-events:none;}
+.stick::before{content:"";position:absolute;left:-74px;top:-74px;width:148px;height:148px;border-radius:50%;border:3px solid rgba(207,199,168,.35);background:rgba(0,0,0,.2);}
+.stick i{position:absolute;left:-32px;top:-32px;width:64px;height:64px;border-radius:50%;background:rgba(217,165,40,.5);border:2px solid rgba(0,0,0,.6);}
+#stick2 i{background:rgba(178,58,58,.55);}
+/* touch HUD: no key list, no resource list or weapon bar (the bag and the weapon button cover them), the rest enlarged */
+#app.touch #invPlate,#app.touch #weaponBar,#app.touch #buildHint{display:none;}
+#app.touch #minimapWrap{transform:scale(1.2);transform-origin:0 0;}
+#app.touch #statsPlate{transform:translateX(-50%) scale(1.3);transform-origin:50% 0;}
+#app.touch #healthPlate{transform:scale(1.3);transform-origin:0 100%;}
+#app.touch #ammoPlate{left:376px;transform:scale(1.3);transform-origin:0 100%;}
+#app.touch #loadChip{bottom:160px;transform:scale(1.3);transform-origin:0 100%;}
+#app.touch #prompt{bottom:190px;transform:translateX(-50%) scale(1.4);transform-origin:50% 100%;}
+#app.touch #saveChip{top:86px;left:50%;transform:translateX(-50%) scale(1.3);}
+#app.touch #buildBar{left:16px;bottom:180px;transform:scale(.72);transform-origin:0 100%;} /* clear of the pad on the right */
+#app.touch .slot{pointer-events:auto;}
+/* upright phone: the game needs the long side */
+#rotateHint{display:none;position:fixed;inset:0;z-index:99;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--bg-void);color:var(--hazard-300);font-family:var(--display-font);font-size:20px;text-align:center;padding:24px;}
+#rotateHint b{font-size:72px;line-height:1;}
+@media (orientation:portrait) and (pointer:coarse){ #rotateHint{display:flex;} }
 
 /* ---------- Settings (from the pause menu or the title) ---------- */
 #settingsOverlay{z-index:12;}

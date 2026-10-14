@@ -1,5 +1,11 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!-- added to the home screen of a phone, it opens without the browser's bars -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0b0d07">
+<link rel="manifest" href="manifest.json">
 <title>최후의 피난처 — 좀비 서바이벌</title>
 <link rel="stylesheet" href="css/style.css">
 
@@ -269,15 +275,22 @@
   </div>
 
   <!-- on-screen controls; shown after the first touch (controls.js) -->
-  <div id="stick" class="hidden"><i></i></div>
+  <div id="stick" class="stick hidden"><i></i></div>
+  <div id="stick2" class="stick hidden"><i></i></div>
   <div id="touchUI" class="hidden">
-    <button data-t="pause">Ⅱ</button><button data-t="map">지도</button><button data-t="bag">가방</button>
-    <button data-t="build">건설</button><button data-t="demolish">철거</button><button data-t="swap">무기</button>
-    <button data-t="grenade">수류탄</button><button data-t="molotov">화염병</button><button data-t="heal">치료</button>
-    <button data-t="eat">식사</button><button data-t="reload">장전</button><button data-t="melee">근접</button>
-    <button data-t="use" class="wide">줍기 · 사용</button>
+    <div class="t-top">
+      <button data-t="demolish">철거</button><button data-t="build">건설</button><button data-t="bag">가방</button>
+      <button data-t="map">지도</button><button data-t="full">⛶</button><button data-t="pause">Ⅱ</button>
+    </div>
+    <div class="t-pad">
+      <button data-t="grenade">수류탄</button><button data-t="molotov">화염병</button><button data-t="heal">치료</button>
+      <button data-t="eat">식사</button><button data-t="reload">장전</button><button data-t="swap">무기</button>
+      <button data-t="melee">근접</button><button data-t="use" class="wide">줍기 · 사용</button>
+    </div>
   </div>
 </div>
+<!-- phones held upright -->
+<div id="rotateHint"><b>⟳</b><span id="rotateText"></span></div>
 
 <script src="js/config.js"></script>
 <script src="js/util.js"></script>

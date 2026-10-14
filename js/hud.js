@@ -45,9 +45,10 @@ for(const k in ITEMS){
   el.invRows.insertBefore(row, el.invRows.children[4]||null);
   el.foodRow={row, num:row.lastChild, shown:-1};
 }
-BUILD_DEFS.forEach(d=>{
+BUILD_DEFS.forEach((d,i)=>{
   d.slot=document.createElement('div');
   d.slot.className='slot';
+  d.slot.addEventListener('click',()=>{ buildSel=i; }); // touch screens: tap a slot to pick it
   el.buildBar.appendChild(d.slot);
 });
 // Names on the rows and slots built above; called again when the language changes.
@@ -331,8 +332,9 @@ function openEatDial(){
   dial.keys = list; dial.open = true; dial.sel = -1;
   dial.def = Math.max(0, list.indexOf(lastFood));
   // centred on the cursor, so a flick in any direction picks a food
-  dial.x = clamp(mouse.x,170,VIEW_W-170); dial.y = clamp(mouse.y,170,VIEW_H-170);
-  dial.el.style.left = dial.x+'px'; dial.el.style.top = dial.y+'px';
+  const m = 170/viewZoom; // the dial is a HUD element: stage pixels = view pixels x viewZoom
+  dial.x = clamp(mouse.x,m,VIEW_W-m); dial.y = clamp(mouse.y,m,VIEW_H-m);
+  dial.el.style.left = dial.x*viewZoom+'px'; dial.el.style.top = dial.y*viewZoom+'px';
   dial.ring.innerHTML = list.map((k,i)=>{
     const a = -Math.PI/2 + i/list.length*Math.PI*2;
     return '<div class="eat-node" style="left:'+(Math.cos(a)*112).toFixed(1)+'px;top:'+(Math.sin(a)*112).toFixed(1)+'px">'+

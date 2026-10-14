@@ -139,6 +139,7 @@ function newGame(){
   const go = ()=>{
     deleteSave();
     ensureAudio();
+    if(touch.on) enterFullscreen(); // a phone: use the whole screen
     resetGame();
     gameState = 'playing';
     document.getElementById('startOverlay').classList.add('hidden');
@@ -177,6 +178,7 @@ document.getElementById('slotDel').addEventListener('click', ()=>{
 });
 function continueFromSave(){
   ensureAudio();
+  if(touch.on) enterFullscreen();
   if(!loadGame()){ refreshSaveUI(); return; }
   gameState = 'playing';
   document.getElementById('startOverlay').classList.add('hidden');

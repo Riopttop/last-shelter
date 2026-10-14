@@ -1,0 +1,10 @@
+{
+  "name": "최후의 피난처 — Last Shelter",
+  "short_name": "Last Shelter",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0d07",
+  "theme_color": "#0b0d07"
+}

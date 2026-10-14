@@ -148,6 +148,7 @@ function applyLang(){
     const h = HTML_STR[n.dataset.i18n];
     n.innerHTML = T(h[settings.lang] || h.ko);
   });
+  document.getElementById('rotateText').textContent = T('기기를 가로로 돌려 주세요');
   renderKeyHints();
   labelHud();
   labelAdmin();
@@ -230,9 +231,19 @@ setUI.overlay.addEventListener('change', e=>{
   saveSettings();
   if(e.target.dataset.vol==='master' || e.target.dataset.vol==='sfx') sfx.loot();
 });
+// Has to be called from a tap or a click. False where the browser has no fullscreen at all (iPhone).
+function enterFullscreen(){
+  const el = document.documentElement;
+  if(!el.requestFullscreen) return false;
+  if(document.fullscreenElement) return true;
+  el.requestFullscreen({navigationUI:'hide'}).then(()=>{
+    if(screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); // phones: keep it sideways
+  }).catch(()=>{});
+  return true;
+}
 function toggleFullscreen(){
   if(document.fullscreenElement) document.exitFullscreen();
-  else if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  else if(!enterFullscreen()) askConfirm(T('이 브라우저는 전체화면 전환을 지원하지 않습니다. 아이폰은 공유 버튼 → "홈 화면에 추가"로 설치한 뒤 그 아이콘으로 열면 전체화면으로 실행됩니다.'));
 }
 document.addEventListener('fullscreenchange', renderSettings);
 // While a key change is pending, the next key press belongs to it and never reaches the game.

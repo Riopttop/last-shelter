@@ -89,10 +89,13 @@ function pollGamepad(){
 
 /* ---------- touch ----------
    left part of the screen: a stick that appears under the thumb (move);
-   anywhere else: aim at the finger and fire / place while it is down; buttons for the rest. */
+   anywhere else: a second stick — drag to aim, it fires for as long as the finger is down and leans
+   toward a zombie near the line of fire. A tap without a drag shoots at the tapped spot, and in build
+   mode the finger points at the cell itself. Buttons for the rest. */
 const touch = {on:false, move:null, aim:null, mx:0, my:0, fire:false, alt:false, use:false, demolish:false,
-               ui:document.getElementById('touchUI'), stick:document.getElementById('stick')};
-const STICK_R = 56;
+               ui:document.getElementById('touchUI'), stick:document.getElementById('stick'), stick2:document.getElementById('stick2')};
+const STICK_R = 64; // stick travel, in stage pixels
+// a finger's position in view (canvas) pixels
 function stagePos(t){
   const rect = canvas.getBoundingClientRect();
   return {x:(t.clientX-rect.left)*VIEW_W/rect.width, y:(t.clientY-rect.top)*VIEW_H/rect.height};
@@ -102,11 +105,38 @@ function enableTouch(){
   touch.on = true;
   touch.ui.classList.remove('hidden');
   document.getElementById('app').classList.add('touch');
+  fitStage(); // wider stage, closer view
+}
+function showStick(node,p){
+  node.style.left = p.x*viewZoom+'px'; node.style.top = p.y*viewZoom+'px';
+  node.firstElementChild.style.transform = '';
+  node.classList.remove('hidden');
+}
+// The zombie closest to the aimed line (within 0.3 rad and 460 px) pulls the aim onto itself.
+function aimAssist(a){
+  let best = a, bd = 0.3;
+  for(const z of zombies){
+    if(!z.alive || dist2(z.x,z.y,player.x,player.y) > 460*460) continue;
+    const za = Math.atan2(z.y-player.y, z.x-player.x), d = Math.abs(normAngle(za-a));
+    if(d<bd){ bd = d; best = za; }
+  }
+  return best;
 }
 function touchAim(p){
-  mouse.x = p.x; mouse.y = p.y;
-  touch.fire = !touch.demolish || !buildMode;
-  touch.alt = !touch.fire;
+  const a = touch.aim;
+  if(buildMode){
+    mouse.x = p.x; mouse.y = p.y;
+    touch.fire = !touch.demolish; touch.alt = touch.demolish;
+    return;
+  }
+  const dx = (p.x-a.x0)*viewZoom, dy = (p.y-a.y0)*viewZoom, d = Math.hypot(dx,dy);
+  if(!a.stick && d>20){ a.stick = true; showStick(touch.stick2,{x:a.x0,y:a.y0}); }
+  if(a.stick){
+    if(d>8) a.ang = Math.atan2(dy,dx);
+    const k = Math.min(1,STICK_R/(d||1));
+    touch.stick2.firstElementChild.style.transform = 'translate('+dx*k+'px,'+dy*k+'px)';
+  } else { mouse.x = p.x; mouse.y = p.y; }
+  touch.fire = true; touch.alt = false;
 }
 canvas.addEventListener('touchstart', e=>{
   e.preventDefault(); // no synthetic mouse events
@@ -118,11 +148,9 @@ canvas.addEventListener('touchstart', e=>{
     if(gameState!=='playing') continue;
     if(p.x < VIEW_W*0.38 && !touch.move){
       touch.move = {id:t.identifier, x0:p.x, y0:p.y};
-      touch.stick.style.left = p.x+'px'; touch.stick.style.top = p.y+'px';
-      touch.stick.firstElementChild.style.transform = '';
-      touch.stick.classList.remove('hidden');
+      showStick(touch.stick,p);
     } else if(!touch.aim){
-      touch.aim = {id:t.identifier};
+      touch.aim = {id:t.identifier, x0:p.x, y0:p.y, stick:false, ang:0};
       touchAim(p);
     }
   }
@@ -132,7 +160,7 @@ canvas.addEventListener('touchmove', e=>{
   for(const t of e.changedTouches){
     const p = stagePos(t);
     if(touch.move && t.identifier===touch.move.id){
-      let dx = (p.x-touch.move.x0)/STICK_R, dy = (p.y-touch.move.y0)/STICK_R;
+      let dx = (p.x-touch.move.x0)*viewZoom/STICK_R, dy = (p.y-touch.move.y0)*viewZoom/STICK_R;
       const d = Math.hypot(dx,dy);
       if(d>1){ dx/=d; dy/=d; }
       touch.mx = d<0.18 ? 0 : dx; touch.my = d<0.18 ? 0 : dy;
@@ -143,7 +171,7 @@ canvas.addEventListener('touchmove', e=>{
 function touchEnd(e){
   for(const t of e.changedTouches){
     if(touch.move && t.identifier===touch.move.id){ touch.move = null; touch.mx = touch.my = 0; touch.stick.classList.add('hidden'); }
-    if(touch.aim && t.identifier===touch.aim.id){ touch.aim = null; touch.fire = touch.alt = false; }
+    if(touch.aim && t.identifier===touch.aim.id){ touch.aim = null; touch.fire = touch.alt = false; touch.stick2.classList.add('hidden'); }
   }
 }
 window.addEventListener('touchstart', enableTouch, {passive:true}); // a tap on a menu counts too
@@ -159,6 +187,7 @@ touch.ui.addEventListener('pointerdown', e=>{
   const a = b.dataset.t;
   if(a==='eat'){ if(inPlay()){ openEatDial(); dial.sel = dial.def; closeEatDial(true); } } // a tap eats what the dial would start on
   else if(a==='demolish') touch.demolish = !touch.demolish;
+  else if(a==='full') toggleFullscreen();
   else PAD_ACTIONS[a]();
   if(a==='use') touch.use = true;
   if(a==='melee') touch.alt = true;
@@ -176,6 +205,10 @@ function pollControls(){
   vin.fire = play && (pad.fire || touch.fire);
   vin.alt = play && (pad.alt || touch.alt);
   vin.use = play && (pad.use || touch.use);
+  if(touch.aim && touch.aim.stick && play && !buildMode){ // the aim stick turns the player; the cursor rides ahead
+    const a = aimAssist(touch.aim.ang);
+    mouse.x = player.x-camera.x+Math.cos(a)*200; mouse.y = player.y-camera.y+Math.sin(a)*200;
+  }
   if(touch.on){
     const d = touch.ui.querySelector('[data-t=demolish]');
     d.classList.toggle('off', !buildMode);

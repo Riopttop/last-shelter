@@ -252,6 +252,9 @@ const LANG_EN = {
   '슬롯 {n}의 저장을 삭제할까요? 되돌릴 수 없습니다.':'Delete the save in slot {n}? This cannot be undone.',
   '확인':'OK', '취소':'Cancel',
   '철거':'Demolish', '장전':'Reload', '줍기 · 사용':'Pick up · use',
+  '기기를 가로로 돌려 주세요':'Please turn your device sideways',
+  '이 브라우저는 전체화면 전환을 지원하지 않습니다. 아이폰은 공유 버튼 → "홈 화면에 추가"로 설치한 뒤 그 아이콘으로 열면 전체화면으로 실행됩니다.':
+    'This browser cannot switch to fullscreen. On an iPhone, use Share → "Add to Home Screen" and open the game from that icon: it then runs fullscreen.',
 
   /* ---------- settings ---------- */
   '오디오':'Audio', '게임':'Game', '조작키':'Controls',
